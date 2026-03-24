@@ -1734,6 +1734,65 @@ window.addEventListener('load',()=>{
     });
   },80);
 });
+  // ═══════════════════════════════════════
+//  TOUCH: SIDEBAR DRAG & DROP
+// ═══════════════════════════════════════
+const matElements = document.querySelectorAll('.mat');
+let touchDragItem = null;
+
+matElements.forEach(mat => {
+  mat.addEventListener('touchstart', (e) => {
+    e.preventDefault(); // Prevent page scroll
+    const touch = e.touches[0];
+    touchDragItem = mat.getAttribute('data-key');
+    
+    // Show drag ghost
+    const ghost = document.getElementById('dragGhost');
+    const ghostInner = document.getElementById('ghostInner');
+    ghost.style.display = 'block';
+    ghost.style.left = touch.clientX + 'px';
+    ghost.style.top = touch.clientY + 'px';
+    ghostInner.textContent = SIZES[touchDragItem].lbl;
+  }, { passive: false });
+
+  mat.addEventListener('touchmove', (e) => {
+    if (!touchDragItem) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    
+    // Move ghost
+    const ghost = document.getElementById('dragGhost');
+    ghost.style.left = touch.clientX + 'px';
+    ghost.style.top = touch.clientY + 'px';
+    
+    // Update pendingDrop coordinates for canvas preview (if over canvas)
+    const rect = bpCanvas.getBoundingClientRect();
+    if (touch.clientX >= rect.left && touch.clientX <= rect.right &&
+        touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+      pendingDrop = { cx: touch.clientX - rect.left, cy: touch.clientY - rect.top };
+    } else {
+      pendingDrop = null;
+    }
+    drawBP(); // Update your canvas
+  }, { passive: false });
+
+  mat.addEventListener('touchend', (e) => {
+    if (!touchDragItem) return;
+    
+    // Hide ghost
+    document.getElementById('dragGhost').style.display = 'none';
+    
+    if (pendingDrop) {
+      // Logic to snap and add the new member to the `members` array goes here
+      // const coords = canvasToCm(pendingDrop.cx, pendingDrop.cy);
+      // addMember(touchDragItem, coords.u, coords.v); 
+    }
+    
+    touchDragItem = null;
+    pendingDrop = null;
+    drawBP();
+  });
+});
 </script>
 </body>
 </html>
